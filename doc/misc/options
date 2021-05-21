@@ -229,7 +229,7 @@ options {
         listen-on-v6 [ port <integer> ] [ dscp
             <integer> ] [ tls <string> ] {
             <address_match_element>; ... }; // may occur multiple times
-        lmdb-mapsize <sizeval>;
+        lmdb-mapsize <sizeval>; // non-operational
         lock-file ( <quoted_string> | none );
         maintain-ixfr-base <boolean>; // ancient
         managed-keys-directory <quoted_string>;
@@ -603,7 +603,7 @@ view <string> [ <class> ] {
         }; // may occur multiple times
         key-directory <quoted_string>;
         lame-ttl <duration>;
-        lmdb-mapsize <sizeval>;
+        lmdb-mapsize <sizeval>; // non-operational
         maintain-ixfr-base <boolean>; // ancient
         managed-keys { <string> (
             static-key | initial-key

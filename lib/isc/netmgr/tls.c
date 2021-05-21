@@ -779,11 +779,14 @@ isc_nm_tls_create_server_ctx(const char *keyfile, const char *certfile,
 		INSIST(keyfile != NULL);
 		INSIST(certfile != NULL);
 	}
-
+#ifdef HAVE_WOLFSSL
+	SSL_METHOD *method = TLS_server_method();
+#else
 #ifdef HAVE_TLS_SERVER_METHOD
 	const SSL_METHOD *method = TLS_server_method();
 #else
 	const SSL_METHOD *method = SSLv23_server_method();
+#endif
 #endif
 
 	SSL_CTX *ctx = SSL_CTX_new(method);

@@ -426,6 +426,7 @@ opensslrsa_compare(const dst_key_t *key1, const dst_key_t *key2) {
 	return (true);
 }
 
+#ifndef HAVE_WOLFSSL
 static int
 progress_cb(int p, int n, BN_GENCB *cb) {
 	union {
@@ -441,6 +442,7 @@ progress_cb(int p, int n, BN_GENCB *cb) {
 	}
 	return (1);
 }
+#endif
 
 static isc_result_t
 opensslrsa_generate(dst_key_t *key, int exp, void (*callback)(int)) {
@@ -451,11 +453,16 @@ opensslrsa_generate(dst_key_t *key, int exp, void (*callback)(int)) {
 	} u;
 	RSA *rsa = RSA_new();
 	BIGNUM *e = BN_new();
+#ifndef HAVE_WOLFSSL
 #if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
 	BN_GENCB _cb;
 #endif /* if OPENSSL_VERSION_NUMBER < 0x10100000L || \
 	* defined(LIBRESSL_VERSION_NUMBER) */
 	BN_GENCB *cb = BN_GENCB_new();
+#else
+	UNUSED(callback);
+	UNUSED(u);
+#endif
 	EVP_PKEY *pkey = EVP_PKEY_new();
 
 	/*
@@ -486,7 +493,11 @@ opensslrsa_generate(dst_key_t *key, int exp, void (*callback)(int)) {
 		ISC_UNREACHABLE();
 	}
 
+#ifndef HAVE_WOLFSSL
 	if (rsa == NULL || e == NULL || cb == NULL) {
+#else
+	if (rsa == NULL || e == NULL) {
+#endif
 		goto err;
 	}
 	if (pkey == NULL) {
@@ -506,6 +517,7 @@ opensslrsa_generate(dst_key_t *key, int exp, void (*callback)(int)) {
 		BN_set_bit(e, 32);
 	}
 
+#ifndef HAVE_WOLFSSL
 	if (callback == NULL) {
 		BN_GENCB_set_old(cb, NULL, NULL);
 	} else {
@@ -514,9 +526,14 @@ opensslrsa_generate(dst_key_t *key, int exp, void (*callback)(int)) {
 	}
 
 	if (RSA_generate_key_ex(rsa, key->key_size, e, cb)) {
+#else
+	if (RSA_generate_key_ex(rsa, key->key_size, e, NULL)) {
+#endif
 		BN_free(e);
+#ifndef HAVE_WOLFSSL
 		BN_GENCB_free(cb);
 		cb = NULL;
+#endif
 		key->keydata.pkey = pkey;
 
 		RSA_free(rsa);
@@ -538,10 +555,12 @@ err:
 		RSA_free(rsa);
 		rsa = NULL;
 	}
+#ifndef HAVE_WOLFSSL
 	if (cb != NULL) {
 		BN_GENCB_free(cb);
 		cb = NULL;
 	}
+#endif
 	return (dst__openssl_toresult(ret));
 }
 
@@ -875,7 +894,11 @@ opensslrsa_parse(dst_key_t *key, isc_lex_t *lexer, dst_key_t *pub) {
 	const BIGNUM *ex = NULL;
 #endif /* if !defined(OPENSSL_NO_ENGINE) */
 	isc_mem_t *mctx = key->mctx;
+#ifndef HAVE_WOLFSSL
 	const char *engine = NULL, *label = NULL;
+#else
+	const char *label = NULL;
+#endif
 	EVP_PKEY *pkey = NULL;
 	BIGNUM *n = NULL, *e = NULL, *d = NULL;
 	BIGNUM *p = NULL, *q = NULL;
@@ -908,9 +931,11 @@ opensslrsa_parse(dst_key_t *key, isc_lex_t *lexer, dst_key_t *pub) {
 
 	for (i = 0; i < priv.nelements; i++) {
 		switch (priv.elements[i].tag) {
+#ifndef HAVE_WOLFSSL
 		case TAG_RSA_ENGINE:
 			engine = (char *)priv.elements[i].data;
 			break;
+#endif
 		case TAG_RSA_LABEL:
 			label = (char *)priv.elements[i].data;
 			break;

@@ -34,12 +34,14 @@
 #include "dst_openssl.h"
 #include "dst_parse.h"
 
+#ifndef HAVE_WOLFSSL
 #ifndef NID_X9_62_prime256v1
 #error "P-256 group is not known (NID_X9_62_prime256v1)"
 #endif /* ifndef NID_X9_62_prime256v1 */
 #ifndef NID_secp384r1
 #error "P-384 group is not known (NID_secp384r1)"
 #endif /* ifndef NID_secp384r1 */
+#endif
 
 #define DST_RET(a)        \
 	{                 \
@@ -550,10 +552,10 @@ opensslecdsa_tofile(const dst_key_t *key, const char *directory) {
 	ret = dst__privstruct_writefile(key, &priv, directory);
 
 err:
-	EC_KEY_free(eckey);
 	if (buf != NULL) {
 		isc_mem_put(key->mctx, buf, BN_num_bytes(privkey));
 	}
+	EC_KEY_free(eckey);
 	return (ret);
 }
 
@@ -672,6 +674,7 @@ load_privkey_from_engine(EC_KEY *eckey, const char *engine, const char *label) {
 	return (ISC_R_SUCCESS);
 }
 #else
+#ifndef HAVE_WOLFSSL
 static isc_result_t
 load_pubkey_from_engine(EC_KEY *eckey, const char *engine, const char *label) {
 	UNUSED(eckey);
@@ -680,6 +683,7 @@ load_pubkey_from_engine(EC_KEY *eckey, const char *engine, const char *label) {
 
 	return (DST_R_NOENGINE);
 }
+#endif
 
 static isc_result_t
 load_privkey_from_engine(EC_KEY *eckey, const char *engine, const char *label) {

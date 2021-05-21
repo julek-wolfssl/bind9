@@ -478,7 +478,7 @@ signal_iocompletionport_exit(isc_socketmgr_t *manager) {
 						0, 0)) {
 			errval = GetLastError();
 			strerror_r(errval, strbuf, sizeof(strbuf));
-			FATAL_ERROR(__FILE__, __LINE__,
+			BIND_FATAL_ERROR(__FILE__, __LINE__,
 				    "Can't request service thread to exit: %s",
 				    strbuf);
 		}
@@ -506,7 +506,7 @@ iocompletionport_createthreads(int total_threads, isc_socketmgr_t *manager) {
 		if (manager->hIOCPThreads[i] == NULL) {
 			errval = GetLastError();
 			strerror_r(errval, strbuf, sizeof(strbuf));
-			FATAL_ERROR(__FILE__, __LINE__,
+			BIND_FATAL_ERROR(__FILE__, __LINE__,
 				    "Can't create IOCP thread: %s", strbuf);
 		}
 	}
@@ -529,7 +529,7 @@ iocompletionport_init(isc_socketmgr_t *manager) {
 	if (hHeapHandle == NULL) {
 		errval = GetLastError();
 		strerror_r(errval, strbuf, sizeof(strbuf));
-		FATAL_ERROR(__FILE__, __LINE__,
+		BIND_FATAL_ERROR(__FILE__, __LINE__,
 			    "HeapCreate() failed during initialization: %s",
 			    strbuf);
 	}
@@ -540,7 +540,7 @@ iocompletionport_init(isc_socketmgr_t *manager) {
 	if (manager->hIoCompletionPort == NULL) {
 		errval = GetLastError();
 		strerror_r(errval, strbuf, sizeof(strbuf));
-		FATAL_ERROR(__FILE__, __LINE__,
+		BIND_FATAL_ERROR(__FILE__, __LINE__,
 			    "CreateIoCompletionPort() failed during "
 			    "initialization: %s",
 			    strbuf);
@@ -580,7 +580,7 @@ iocompletionport_update(isc_socket_t *sock) {
 		 * This function should return errors to the caller, not
 		 * exit here.
 		 */
-		FATAL_ERROR(__FILE__, __LINE__,
+		BIND_FATAL_ERROR(__FILE__, __LINE__,
 			    "CreateIoCompletionPort() failed during "
 			    "initialization: %s",
 			    strbuf);
@@ -630,7 +630,7 @@ initialise(void) {
 	if (err != 0) {
 		char strbuf[ISC_STRERRORSIZE];
 		strerror_r(err, strbuf, sizeof(strbuf));
-		FATAL_ERROR(__FILE__, __LINE__, "WSAStartup() failed: %s",
+		BIND_FATAL_ERROR(__FILE__, __LINE__, "WSAStartup() failed: %s",
 			    strbuf);
 	}
 	/*
@@ -2379,7 +2379,7 @@ SocketIoThread(LPVOID ThreadContext) {
 			       THREAD_PRIORITY_ABOVE_NORMAL)) {
 		errval = GetLastError();
 		strerror_r(errval, strbuf, sizeof(strbuf));
-		FATAL_ERROR(__FILE__, __LINE__, "Can't set thread priority: %s",
+		BIND_FATAL_ERROR(__FILE__, __LINE__, "Can't set thread priority: %s",
 			    strbuf);
 	}
 

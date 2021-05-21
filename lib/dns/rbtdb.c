@@ -4532,7 +4532,7 @@ zone_findzonecut(dns_db_t *db, const dns_name_t *name, unsigned int options,
 	UNUSED(rdataset);
 	UNUSED(sigrdataset);
 
-	FATAL_ERROR(__FILE__, __LINE__, "zone_findzonecut() called!");
+	BIND_FATAL_ERROR(__FILE__, __LINE__, "zone_findzonecut() called!");
 
 	/* NOTREACHED */
 	return (ISC_R_NOTIMPLEMENTED);

@@ -163,7 +163,7 @@ dst__openssl_init(isc_mem_t *mctx, const char *engine) {
 
 	/* Protect ourselves against unseeded PRNG */
 	if (RAND_status() != 1) {
-		FATAL_ERROR(__FILE__, __LINE__,
+		BIND_FATAL_ERROR(__FILE__, __LINE__,
 			    "OpenSSL pseudorandom number generator "
 			    "cannot be initialized (see the `PRNG not "
 			    "seeded' message in the OpenSSL FAQ)");

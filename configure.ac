@@ -612,6 +612,71 @@ AS_IF([test "$enable_pthread_rwlock" = "yes"],
 
 CRYPTO=OpenSSL
 
+AC_ARG_WITH([wolfssl], 
+	      [AS_HELP_STRING([--with-wolfssl],
+	      		[Use wolfSSL TLS [default=no]])],
+	      [], [])
+
+if test "$with_wolfssl" = "yes"; then
+
+	#
+	# wolfSSL is mandatory
+	#
+	PKG_CHECK_MODULES(
+		[WOLFSSL],
+		[wolfssl],
+		[],
+		[AC_MSG_ERROR([Could not find wolfSSL.])]
+	)
+	PKG_CHECK_VAR(
+		[WOLFSSL_INCLUDEDIR],
+		[wolfssl],
+		[includedir],
+		[],
+		[AC_MSG_ERROR([Could not find wolfSSL includedir variable.])]
+	)
+	WOLFSSL_CFLAGS="${WOLFSSL_CFLAGS} -I${WOLFSSL_INCLUDEDIR}/wolfssl"
+
+	OPENSSL_CFLAGS="$WOLFSSL_CFLAGS"
+	OPENSSL_LIBS="$WOLFSSL_LIBS"
+	CFLAGS="$CFLAGS $WOLFSSL_CFLAGS"
+	LIBS="$LIBS $WOLFSSL_LIBS"
+	
+	AC_DEFINE([HAVE_WOLFSSL], [1], [Use the wolfSSL TLS library])
+	AC_DEFINE([EXTERNAL_OPTS_OPENVPN], [1], [Instruct wolfSSL to self include the options header])
+	
+	#
+	# Building wolfSSL with --enable-bind takes care of making 
+	# everything necessary available.
+	#
+	
+	AC_DEFINE([HAVE_ECDSA_SIGN], [1], [wolfSSL includes])
+	AC_DEFINE([HAVE_ECDSA_VERIFY], [1], [wolfSSL includes])
+	AC_DEFINE([HAVE_EVP_AES_128_ECB], [1], [wolfSSL includes])
+	AC_DEFINE([HAVE_EVP_AES_192_ECB], [1], [wolfSSL includes])
+	AC_DEFINE([HAVE_EVP_AES_256_ECB], [1], [wolfSSL includes])
+	AC_DEFINE([HAVE_EVP_CIPHER_CTX_FREE], [1], [wolfSSL includes])
+	AC_DEFINE([HAVE_EVP_CIPHER_CTX_NEW], [1], [wolfSSL includes])
+	AC_DEFINE([HAVE_EVP_MD_CTX_RESET], [1], [wolfSSL includes])
+	AC_DEFINE([HAVE_EVP_MD_CTX_FREE], [1], [wolfSSL includes])
+	AC_DEFINE([HAVE_EVP_MD_CTX_NEW], [1], [wolfSSL includes])
+	AC_DEFINE([HAVE_EVP_SHA1], [1], [wolfSSL includes])
+	AC_DEFINE([HAVE_EVP_SHA224], [1], [wolfSSL includes])
+	AC_DEFINE([HAVE_EVP_SHA256], [1], [wolfSSL includes])
+	AC_DEFINE([HAVE_EVP_SHA384], [1], [wolfSSL includes])
+	AC_DEFINE([HAVE_EVP_SHA512], [1], [wolfSSL includes])
+	AC_DEFINE([HAVE_RSA_SET0_KEY], [1], [wolfSSL includes])
+	AC_DEFINE([HAVE_TLS_SERVER_METHOD], [1], [wolfSSL includes])
+	AC_DEFINE([HAVE_HMAC_CTX_NEW], [1], [wolfSSL includes])
+	AC_DEFINE([HAVE_HMAC_CTX_FREE], [1], [wolfSSL includes])
+	AC_DEFINE([HAVE_HMAC_CTX_RESET], [1], [wolfSSL includes])
+	AC_DEFINE([HAVE_HMAC_CTX_GET_MD], [1], [wolfSSL includes])
+	AC_DEFINE([HAVE_DH_GET0_KEY], [1], [wolfSSL includes])
+	AC_DEFINE([HAVE_ECDSA_SIG_GET0], [1], [wolfSSL includes])
+	AC_DEFINE([HAVE_ECDSA_SIG_SET0], [1], [wolfSSL includes])
+
+else
+
 #
 # OpenSSL/LibreSSL is mandatory
 #
@@ -707,6 +772,8 @@ AC_CHECK_FUNCS([EVP_aes_128_ecb EVP_aes_192_ecb EVP_aes_256_ecb], [:],
 AC_CHECK_FUNCS([DH_get0_key ECDSA_SIG_get0 RSA_set0_key])
 
 AC_CHECK_FUNCS([TLS_server_method])
+
+fi
 
 #
 # Check whether FIPS mode is available and whether we should enable it

@@ -44,4 +44,4 @@ scheme.
 
 In the (rare) situation where a library routine encounters a fatal error and
 has no way of reporting the error to the application, the library may call
-FATAL_ERROR().  This will log the problem and then terminate the application.
+BIND_FATAL_ERROR().  This will log the problem and then terminate the application.

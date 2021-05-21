@@ -239,6 +239,7 @@ openssldh_paramcompare(const dst_key_t *key1, const dst_key_t *key2) {
 	return (true);
 }
 
+#ifndef HAVE_WOLFSSL
 static int
 progress_cb(int p, int n, BN_GENCB *cb) {
 	union {
@@ -254,10 +255,12 @@ progress_cb(int p, int n, BN_GENCB *cb) {
 	}
 	return (1);
 }
+#endif
 
 static isc_result_t
 openssldh_generate(dst_key_t *key, int generator, void (*callback)(int)) {
 	DH *dh = NULL;
+#ifndef HAVE_WOLFSSL
 	BN_GENCB *cb;
 #if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
 	BN_GENCB _cb;
@@ -267,6 +270,10 @@ openssldh_generate(dst_key_t *key, int generator, void (*callback)(int)) {
 		void *dptr;
 		void (*fptr)(int);
 	} u;
+#else
+
+	(void)callback;
+#endif
 
 	if (generator == 0) {
 		if (key->key_size == 768 || key->key_size == 1024 ||
@@ -304,7 +311,9 @@ openssldh_generate(dst_key_t *key, int generator, void (*callback)(int)) {
 		if (dh == NULL) {
 			return (dst__openssl_toresult(ISC_R_NOMEMORY));
 		}
+#ifndef HAVE_WOLFSSL
 		cb = BN_GENCB_new();
+#endif
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L && !defined(LIBRESSL_VERSION_NUMBER)
 		if (cb == NULL) {
 			DH_free(dh);
@@ -312,15 +321,21 @@ openssldh_generate(dst_key_t *key, int generator, void (*callback)(int)) {
 		}
 #endif /* if OPENSSL_VERSION_NUMBER >= 0x10100000L && \
 	* !defined(LIBRESSL_VERSION_NUMBER) */
+#ifndef HAVE_WOLFSSL
 		if (callback == NULL) {
 			BN_GENCB_set_old(cb, NULL, NULL);
 		} else {
 			u.fptr = callback;
 			BN_GENCB_set(cb, progress_cb, u.dptr);
 		}
+#endif
 
 		if (!DH_generate_parameters_ex(dh, key->key_size, generator,
+#ifndef HAVE_WOLFSSL
 					       cb)) {
+#else
+					       NULL)) {
+#endif
 			DH_free(dh);
 			BN_GENCB_free(cb);
 			return (dst__openssl_toresult2("DH_generate_parameters_"
@@ -328,7 +343,9 @@ openssldh_generate(dst_key_t *key, int generator, void (*callback)(int)) {
 						       DST_R_OPENSSLFAILURE));
 		}
 		BN_GENCB_free(cb);
+#ifndef HAVE_WOLFSSL
 		cb = NULL;
+#endif
 	}
 
 	if (DH_generate_key(dh) == 0) {
@@ -336,7 +353,9 @@ openssldh_generate(dst_key_t *key, int generator, void (*callback)(int)) {
 		return (dst__openssl_toresult2("DH_generate_key",
 					       DST_R_OPENSSLFAILURE));
 	}
+#ifndef HAVE_WOLFSSL
 	DH_clear_flags(dh, DH_FLAG_CACHE_MONT_P);
+#endif
 	key->keydata.dh = dh;
 
 	return (ISC_R_SUCCESS);
@@ -461,7 +480,9 @@ openssldh_fromdns(dst_key_t *key, isc_buffer_t *data) {
 	if (dh == NULL) {
 		return (dst__openssl_toresult(ISC_R_NOMEMORY));
 	}
+#ifndef HAVE_WOLFSSL
 	DH_clear_flags(dh, DH_FLAG_CACHE_MONT_P);
+#endif
 
 	/*
 	 * Read the prime length.  1 & 2 are table entries, > 16 means a
@@ -682,7 +703,9 @@ openssldh_parse(dst_key_t *key, isc_lex_t *lexer, dst_key_t *pub) {
 	if (dh == NULL) {
 		DST_RET(ISC_R_NOMEMORY);
 	}
+#ifndef HAVE_WOLFSSL
 	DH_clear_flags(dh, DH_FLAG_CACHE_MONT_P);
+#endif
 	key->keydata.dh = dh;
 
 	for (i = 0; i < priv.nelements; i++) {

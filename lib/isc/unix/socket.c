@@ -948,7 +948,7 @@ select_poke(isc__socketmgr_t *mgr, int threadid, int fd, int msg) {
 
 	if (cc < 0) {
 		strerror_r(errno, strbuf, sizeof(strbuf));
-		FATAL_ERROR(__FILE__, __LINE__,
+		BIND_FATAL_ERROR(__FILE__, __LINE__,
 			    "write() failed during watcher poke: %s", strbuf);
 	}
 
@@ -973,7 +973,7 @@ select_readmsg(isc__socketthread_t *thread, int *fd, int *msg) {
 		}
 
 		strerror_r(errno, strbuf, sizeof(strbuf));
-		FATAL_ERROR(__FILE__, __LINE__,
+		BIND_FATAL_ERROR(__FILE__, __LINE__,
 			    "read() failed during watcher poke: %s", strbuf);
 	}
 	INSIST(cc == sizeof(buf));
@@ -3469,7 +3469,7 @@ netthread(void *uap) {
 
 			if (cc < 0 && !SOFT_ERROR(errno)) {
 				strerror_r(errno, strbuf, sizeof(strbuf));
-				FATAL_ERROR(__FILE__, __LINE__, "%s failed: %s",
+				BIND_FATAL_ERROR(__FILE__, __LINE__, "%s failed: %s",
 					    fnname, strbuf);
 			}
 

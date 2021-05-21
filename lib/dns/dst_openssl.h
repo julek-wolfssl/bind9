@@ -34,7 +34,11 @@
  */
 #define BN_GENCB_free(x)    ((void)0)
 #define BN_GENCB_new()	    (&_cb)
+#ifndef HAVE_WOLFSSL
 #define BN_GENCB_get_arg(x) ((x)->arg)
+#else
+#define BN_GENCB_get_arg(x) (NULL)
+#endif
 #endif /* if OPENSSL_VERSION_NUMBER < 0x10100000L || \
 	* defined(LIBRESSL_VERSION_NUMBER) */
 

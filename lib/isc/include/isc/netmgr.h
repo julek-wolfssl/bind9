@@ -16,7 +16,11 @@
 #include <isc/result.h>
 #include <isc/types.h>
 
+#ifdef HAVE_WOLFSSL
+typedef struct WOLFSSL_CTX isc_ssl_ctx_t;
+#else
 typedef struct ssl_ctx_st isc_ssl_ctx_t;
+#endif
 
 /*
  * Replacement for isc_sockettype_t provided by socket.h.
