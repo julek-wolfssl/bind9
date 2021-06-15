@@ -60,7 +60,7 @@ isc_sha1_init(isc_sha1_t *context)
 	context->ctx = EVP_MD_CTX_new();
 	RUNTIME_CHECK(context->ctx != NULL);
 	if (EVP_DigestInit(context->ctx, EVP_sha1()) != 1) {
-		FATAL_ERROR(__FILE__, __LINE__, "Cannot initialize SHA1.");
+		BIND_FATAL_ERROR(__FILE__, __LINE__, "Cannot initialize SHA1.");
 	}
 }
 

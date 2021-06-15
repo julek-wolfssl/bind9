@@ -289,7 +289,7 @@ extern void mock_assert(const int result, const char* const expression,
 /*% Unexpected Error */
 #define UNEXPECTED_ERROR		isc_error_unexpected
 /*% Fatal Error */
-#define FATAL_ERROR			isc_error_fatal
+#define BIND_FATAL_ERROR			isc_error_fatal
 
 #ifdef UNIT_TESTING
 

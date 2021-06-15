@@ -39,11 +39,13 @@
 #include <openssl/ecdsa.h>
 #include <openssl/bn.h>
 
+#ifndef HAVE_WOLFSSL
 #ifndef NID_X9_62_prime256v1
 #error "P-256 group is not known (NID_X9_62_prime256v1)"
 #endif
 #ifndef NID_secp384r1
 #error "P-384 group is not known (NID_secp384r1)"
+#endif
 #endif
 
 #define DST_RET(a) {ret = a; goto err;}
@@ -506,10 +508,10 @@ opensslecdsa_tofile(const dst_key_t *key, const char *directory) {
 	ret = dst__privstruct_writefile(key, &priv, directory);
 
  err:
-	if (eckey != NULL)
-		EC_KEY_free(eckey);
 	if (buf != NULL)
 		isc_mem_put(key->mctx, buf, BN_num_bytes(privkey));
+	if (eckey != NULL)
+		EC_KEY_free(eckey);
 	return (ret);
 }
 

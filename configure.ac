@@ -1475,6 +1475,72 @@ AC_ARG_WITH(openssl,
 	    use_openssl="$withval", use_openssl="auto")
 
 #
+# was --with-wolfssl specified?
+#
+AC_ARG_WITH([wolfssl],
+	    AS_HELP_STRING([--with-wolfssl[=PATH]],
+			   [Build with wolfSSL [yes|no|path].
+				(Crypto is required for DNSSEC)]),
+	    use_wolfssl="$withval", use_wolfssl="auto")
+
+if test "no" != "$use_wolfssl"
+then
+	if test "yes" = "$use_wolfssl"
+	then
+		PKG_CHECK_MODULES(
+			[WOLFSSL],
+			[wolfssl],
+			[],
+			[AC_MSG_ERROR([Could not find wolfSSL.])]
+		)
+		PKG_CHECK_VAR(
+			[WOLFSSL_INCLUDEDIR],
+			[wolfssl],
+			[includedir],
+			[],
+			[AC_MSG_ERROR([Could not find wolfSSL includedir variable.])]
+		)
+		WOLFSSL_CFLAGS="${WOLFSSL_CFLAGS} -I${WOLFSSL_INCLUDEDIR}/wolfssl"
+	else
+		WOLFSSL_CFLAGS="${WOLFSSL_CFLAGS} -I${use_wolfssl}/include -I${use_wolfssl}/include/wolfssl"
+		WOLFSSL_LIBS="${WOLFSSL_LIBS} -L${use_wolfssl}/lib -lwolfssl"
+	fi
+	AC_DEFINE([HAVE_WOLFSSL], [1], [Use the wolfSSL TLS library])
+	WOLFSSL_CFLAGS="${WOLFSSL_CFLAGS} -DEXTERNAL_OPTS_OPENVPN"
+	AC_DEFINE([HAVE_OPENSSL_DSA], [1], [wolfSSL includes])
+	AC_DEFINE([OPENSSL_NO_ENGINE], [1], [wolfSSL includes])
+	# copied from defines that worked for version 9.17.9
+	AC_DEFINE([HAVE_ECDSA_SIGN], [1], [wolfSSL includes])
+	AC_DEFINE([HAVE_ECDSA_VERIFY], [1], [wolfSSL includes])
+	AC_DEFINE([HAVE_EVP_AES_128_ECB], [1], [wolfSSL includes])
+	AC_DEFINE([HAVE_EVP_AES_192_ECB], [1], [wolfSSL includes])
+	AC_DEFINE([HAVE_EVP_AES_256_ECB], [1], [wolfSSL includes])
+	AC_DEFINE([HAVE_EVP_CIPHER_CTX_FREE], [1], [wolfSSL includes])
+	AC_DEFINE([HAVE_EVP_CIPHER_CTX_NEW], [1], [wolfSSL includes])
+	AC_DEFINE([HAVE_EVP_MD_CTX_RESET], [1], [wolfSSL includes])
+	AC_DEFINE([HAVE_EVP_MD_CTX_FREE], [1], [wolfSSL includes])
+	AC_DEFINE([HAVE_EVP_MD_CTX_NEW], [1], [wolfSSL includes])
+	AC_DEFINE([HAVE_EVP_SHA1], [1], [wolfSSL includes])
+	AC_DEFINE([HAVE_EVP_SHA224], [1], [wolfSSL includes])
+	AC_DEFINE([HAVE_EVP_SHA256], [1], [wolfSSL includes])
+	AC_DEFINE([HAVE_EVP_SHA384], [1], [wolfSSL includes])
+	AC_DEFINE([HAVE_EVP_SHA512], [1], [wolfSSL includes])
+	AC_DEFINE([HAVE_RSA_SET0_KEY], [1], [wolfSSL includes])
+	AC_DEFINE([HAVE_TLS_SERVER_METHOD], [1], [wolfSSL includes])
+	AC_DEFINE([HAVE_HMAC_CTX_NEW], [1], [wolfSSL includes])
+	AC_DEFINE([HAVE_HMAC_CTX_FREE], [1], [wolfSSL includes])
+	AC_DEFINE([HAVE_HMAC_CTX_RESET], [1], [wolfSSL includes])
+	AC_DEFINE([HAVE_HMAC_CTX_GET_MD], [1], [wolfSSL includes])
+	AC_DEFINE([HAVE_DH_GET0_KEY], [1], [wolfSSL includes])
+	AC_DEFINE([HAVE_DSA_GET0_PQG], [1], [wolfSSL includes])
+	AC_DEFINE([HAVE_OPENSSL_EVP_AES], [1], [wolfSSL includes])
+	AC_DEFINE([HAVE_OPENSSL_AES], [1], [wolfSSL includes])
+	AC_DEFINE([HAVE_ECDSA_SIG_GET0], [1], [wolfSSL includes])
+	AC_DEFINE([HAVE_ECDSA_SIG_SET0], [1], [wolfSSL includes])
+	use_openssl="wolfssl"
+fi
+
+#
 # was --with-pkcs11 specified?
 #
 AC_ARG_WITH(pkcs11,
@@ -1586,6 +1652,25 @@ case "$use_openssl" in
 		AC_MSG_ERROR(
 [OpenSSL was not found in any of $openssldirs; use --with-openssl=/path
 If you don't want OpenSSL, use --without-openssl])
+		;;
+	wolfssl)
+		AC_MSG_RESULT(Using wolfSSL)
+		DST_OPENSSL_INC="${WOLFSSL_CFLAGS}"
+		DST_OPENSSL_LIBS="${WOLFSSL_LIBS}"
+		CRYPTO="-DHAVE_WOLFSSL -DOPENSSL"
+		OPENSSL_ECDSA="yes"
+		OPENSSLECDSALINKOBJS='${OPENSSLECDSALINKOBJS}'
+		OPENSSLECDSALINKSRCS='${OPENSSLECDSALINKSRCS}'
+		AC_DEFINE(HAVE_OPENSSL_ECDSA, 1,
+			  [Define if your OpenSSL version supports ECDSA.])
+		OPENSSLEDDSALINKOBJS=""
+		OPENSSLEDDSALINKSRCS=""
+		OPENSSLGOSTLINKOBJS=""
+		OPENSSLGOSTLINKSRCS=""
+		OPENSSLLINKOBJS='${OPENSSLLINKOBJS}'
+		OPENSSLLINKSRCS='${OPENSSLLINKSRCS}'
+		ISC_OPENSSL_INC="$DST_OPENSSL_INC"
+		ISC_OPENSSL_LIBS="$DST_OPENSSL_LIBS"
 		;;
 	*)
 		if test "yes" = "$want_native_pkcs11"
@@ -5508,8 +5593,13 @@ report() {
     if test "yes" = "$enable_full_report"; then
 	test "no" = "$enable_ipv6" -o "no" = "$found_ipv6" || \
 	    echo "    IPv6 support (--enable-ipv6)"
-	test "X$CRYPTO" = "X" -o "yes" = "$want_native_pkcs11" || \
-		echo "    OpenSSL cryptography/DNSSEC (--with-openssl)"
+	if test "no" != "$use_wolfssl"
+	then
+		echo "    wolfSSL cryptography (--with-wolfssl)"
+	else
+		test "X$CRYPTO" = "X" -o "yes" = "$want_native_pkcs11" || \
+			echo "    OpenSSL cryptography/DNSSEC (--with-openssl)"
+	fi
 	test "X$PYTHON" = "X" || echo "    Python tools (--with-python)"
 	test "X$XMLSTATS" = "X" || echo "    XML statistics (--with-libxml2)"
 	test "X$JSONSTATS" = "X" || echo "    JSON statistics (--with-libjson)"

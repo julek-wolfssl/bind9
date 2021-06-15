@@ -58,7 +58,7 @@ print_token(isc_token_t *tokenp, FILE *stream) {
 		fprintf(stream, "NOMORE");
 		break;
 	default:
-		FATAL_ERROR(__FILE__, __LINE__, "Unexpected type %d",
+		BIND_FATAL_ERROR(__FILE__, __LINE__, "Unexpected type %d",
 			    tokenp->type);
 	}
 }

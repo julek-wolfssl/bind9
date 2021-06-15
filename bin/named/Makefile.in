@@ -155,9 +155,10 @@ named@EXEEXT@: ${OBJS} ${DEPLIBS}
 	export BASEOBJS="${OBJS} ${UOBJS}"; \
 	${FINALBUILDCMD}
 
+# use soft links as hard links aren't allowed on shared vm disks
 lwresd@EXEEXT@: named@EXEEXT@
 	rm -f lwresd@EXEEXT@
-	@LN@ named@EXEEXT@ lwresd@EXEEXT@
+	@LN@ named@EXEEXT@ lwresd@EXEEXT@ -s
 
 doc man:: ${MANOBJS}
 
@@ -180,9 +181,10 @@ installdirs:
 	$(SHELL) ${top_srcdir}/mkinstalldirs ${DESTDIR}${mandir}/man5
 	$(SHELL) ${top_srcdir}/mkinstalldirs ${DESTDIR}${mandir}/man8
 
+# use soft links as hard links aren't allowed on shared vm disks
 install:: named@EXEEXT@ lwresd@EXEEXT@ installdirs
 	${LIBTOOL_MODE_INSTALL} ${INSTALL_PROGRAM} named@EXEEXT@ ${DESTDIR}${sbindir}
-	(cd ${DESTDIR}${sbindir}; rm -f lwresd@EXEEXT@; @LN@ named@EXEEXT@ lwresd@EXEEXT@)
+	(cd ${DESTDIR}${sbindir}; rm -f lwresd@EXEEXT@; @LN@ named@EXEEXT@ lwresd@EXEEXT@ -s)
 	${INSTALL_DATA} ${srcdir}/named.8 ${DESTDIR}${mandir}/man8
 	${INSTALL_DATA} ${srcdir}/lwresd.8 ${DESTDIR}${mandir}/man8
 	${INSTALL_DATA} ${srcdir}/named.conf.5 ${DESTDIR}${mandir}/man5

@@ -348,7 +348,7 @@ isc_sockaddr_pf(const isc_sockaddr_t *sockaddr) {
 	case AF_INET6:
 		return (PF_INET6);
 	default:
-		FATAL_ERROR(__FILE__, __LINE__,
+		BIND_FATAL_ERROR(__FILE__, __LINE__,
 			    isc_msgcat_get(isc_msgcat, ISC_MSGSET_SOCKADDR,
 					   ISC_MSG_UNKNOWNFAMILY,
 					   "unknown address family: %d"),
@@ -400,7 +400,7 @@ isc_sockaddr_setport(isc_sockaddr_t *sockaddr, in_port_t port) {
 		sockaddr->type.sin6.sin6_port = htons(port);
 		break;
 	default:
-		FATAL_ERROR(__FILE__, __LINE__,
+		BIND_FATAL_ERROR(__FILE__, __LINE__,
 			    isc_msgcat_get(isc_msgcat, ISC_MSGSET_SOCKADDR,
 					   ISC_MSG_UNKNOWNFAMILY,
 					   "unknown address family: %d"),
@@ -420,7 +420,7 @@ isc_sockaddr_getport(const isc_sockaddr_t *sockaddr) {
 		port = ntohs(sockaddr->type.sin6.sin6_port);
 		break;
 	default:
-		FATAL_ERROR(__FILE__, __LINE__,
+		BIND_FATAL_ERROR(__FILE__, __LINE__,
 			    isc_msgcat_get(isc_msgcat, ISC_MSGSET_SOCKADDR,
 					   ISC_MSG_UNKNOWNFAMILY,
 					   "unknown address family: %d"),

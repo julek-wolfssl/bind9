@@ -465,7 +465,7 @@ signal_iocompletionport_exit(isc_socketmgr_t *manager) {
 						0, 0, 0)) {
 			errval = GetLastError();
 			isc__strerror(errval, strbuf, sizeof(strbuf));
-			FATAL_ERROR(__FILE__, __LINE__,
+			BIND_FATAL_ERROR(__FILE__, __LINE__,
 				isc_msgcat_get(isc_msgcat, ISC_MSGSET_SOCKET,
 				ISC_MSG_FAILED,
 				"Can't request service thread to exit: %s"),
@@ -495,7 +495,7 @@ iocompletionport_createthreads(int total_threads, isc_socketmgr_t *manager) {
 		if (manager->hIOCPThreads[i] == NULL) {
 			errval = GetLastError();
 			isc__strerror(errval, strbuf, sizeof(strbuf));
-			FATAL_ERROR(__FILE__, __LINE__,
+			BIND_FATAL_ERROR(__FILE__, __LINE__,
 				isc_msgcat_get(isc_msgcat, ISC_MSGSET_SOCKET,
 				ISC_MSG_FAILED,
 				"Can't create IOCP thread: %s"),
@@ -521,7 +521,7 @@ iocompletionport_init(isc_socketmgr_t *manager) {
 	if (hHeapHandle == NULL) {
 		errval = GetLastError();
 		isc__strerror(errval, strbuf, sizeof(strbuf));
-		FATAL_ERROR(__FILE__, __LINE__,
+		BIND_FATAL_ERROR(__FILE__, __LINE__,
 			    isc_msgcat_get(isc_msgcat, ISC_MSGSET_SOCKET,
 					   ISC_MSG_FAILED,
 					   "HeapCreate() failed during "
@@ -538,7 +538,7 @@ iocompletionport_init(isc_socketmgr_t *manager) {
 	if (manager->hIoCompletionPort == NULL) {
 		errval = GetLastError();
 		isc__strerror(errval, strbuf, sizeof(strbuf));
-		FATAL_ERROR(__FILE__, __LINE__,
+		BIND_FATAL_ERROR(__FILE__, __LINE__,
 				isc_msgcat_get(isc_msgcat, ISC_MSGSET_SOCKET,
 				ISC_MSG_FAILED,
 				"CreateIoCompletionPort() failed "
@@ -582,7 +582,7 @@ iocompletionport_update(isc_socket_t *sock) {
 		 * This function should return errors to the caller, not
 		 * exit here.
 		 */
-		FATAL_ERROR(__FILE__, __LINE__,
+		BIND_FATAL_ERROR(__FILE__, __LINE__,
 				isc_msgcat_get(isc_msgcat, ISC_MSGSET_SOCKET,
 				ISC_MSG_FAILED,
 				"CreateIoCompletionPort() failed "
@@ -635,7 +635,7 @@ initialise(void) {
 	if (err != 0) {
 		char strbuf[ISC_STRERRORSIZE];
 		isc__strerror(err, strbuf, sizeof(strbuf));
-		FATAL_ERROR(__FILE__, __LINE__, "WSAStartup() %s: %s",
+		BIND_FATAL_ERROR(__FILE__, __LINE__, "WSAStartup() %s: %s",
 			    isc_msgcat_get(isc_msgcat, ISC_MSGSET_GENERAL,
 					   ISC_MSG_FAILED, "failed"),
 			    strbuf);
@@ -2519,7 +2519,7 @@ SocketIoThread(LPVOID ThreadContext) {
 			       THREAD_PRIORITY_ABOVE_NORMAL)) {
 		errval = GetLastError();
 		isc__strerror(errval, strbuf, sizeof(strbuf));
-		FATAL_ERROR(__FILE__, __LINE__,
+		BIND_FATAL_ERROR(__FILE__, __LINE__,
 				isc_msgcat_get(isc_msgcat, ISC_MSGSET_SOCKET,
 				ISC_MSG_FAILED,
 				"Can't set thread priority: %s"),

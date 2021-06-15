@@ -59,7 +59,7 @@ isc_md5_init(isc_md5_t *ctx) {
 	ctx->ctx = EVP_MD_CTX_new();
 	RUNTIME_CHECK(ctx->ctx != NULL);
 	if (EVP_DigestInit(ctx->ctx, EVP_md5()) != 1) {
-		FATAL_ERROR(__FILE__, __LINE__, "Cannot initialize MD5.");
+		BIND_FATAL_ERROR(__FILE__, __LINE__, "Cannot initialize MD5.");
 	}
 }
 

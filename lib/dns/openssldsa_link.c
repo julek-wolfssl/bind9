@@ -122,7 +122,9 @@ DSA_SIG_set0(DSA_SIG *sig, BIGNUM *r, BIGNUM *s) {
 }
 
 
+#ifndef HAVE_WOLFSSL
 #define DSA_clear_flags(d, x) (d)->flags &= ~(x)
+#endif
 
 #endif
 
@@ -418,6 +420,7 @@ openssldsa_compare(const dst_key_t *key1, const dst_key_t *key2) {
 }
 
 #if OPENSSL_VERSION_NUMBER > 0x00908000L
+#ifndef HAVE_WOLFSSL
 static int
 progress_cb(int p, int n, BN_GENCB *cb) {
 	union {
@@ -433,13 +436,14 @@ progress_cb(int p, int n, BN_GENCB *cb) {
 	return (1);
 }
 #endif
+#endif
 
 static isc_result_t
 openssldsa_generate(dst_key_t *key, int unused, void (*callback)(int)) {
 	DSA *dsa;
 	unsigned char rand_array[ISC_SHA1_DIGESTLENGTH];
 	isc_result_t result;
-#if OPENSSL_VERSION_NUMBER > 0x00908000L
+#if OPENSSL_VERSION_NUMBER > 0x00908000L && !defined(HAVE_WOLFSSL)
 	BN_GENCB *cb;
 #if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
 	BN_GENCB _cb;
@@ -460,7 +464,7 @@ openssldsa_generate(dst_key_t *key, int unused, void (*callback)(int)) {
 	if (result != ISC_R_SUCCESS)
 		return (result);
 
-#if OPENSSL_VERSION_NUMBER > 0x00908000L
+#if OPENSSL_VERSION_NUMBER > 0x00908000L && !defined(HAVE_WOLFSSL)
 	dsa = DSA_new();
 	if (dsa == NULL)
 		return (dst__openssl_toresult(DST_R_OPENSSLFAILURE));
@@ -504,7 +508,9 @@ openssldsa_generate(dst_key_t *key, int unused, void (*callback)(int)) {
 					       DST_R_OPENSSLFAILURE));
 	}
 
+#ifndef HAVE_WOLFSSL
 	DSA_clear_flags(dsa, DSA_FLAG_CACHE_MONT_P);
+#endif
 
 	key->keydata.dsa = dsa;
 
@@ -588,7 +594,9 @@ openssldsa_fromdns(dst_key_t *key, isc_buffer_t *data) {
 	dsa = DSA_new();
 	if (dsa == NULL)
 		return (ISC_R_NOMEMORY);
+#ifndef HAVE_WOLFSSL
 	DSA_clear_flags(dsa, DSA_FLAG_CACHE_MONT_P);
+#endif
 
 	t = (unsigned int) *r.base;
 	isc_region_consume(&r, 1);
@@ -724,7 +732,9 @@ openssldsa_parse(dst_key_t *key, isc_lex_t *lexer, dst_key_t *pub) {
 	dsa = DSA_new();
 	if (dsa == NULL)
 		DST_RET(ISC_R_NOMEMORY);
+#ifndef HAVE_WOLFSSL
 	DSA_clear_flags(dsa, DSA_FLAG_CACHE_MONT_P);
+#endif
 	key->keydata.dsa = dsa;
 
 	for (i = 0; i < priv.nelements; i++) {

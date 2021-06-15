@@ -62,7 +62,7 @@ isc_lib_initmsgcat(void) {
 	result = isc_once_do(&msgcat_once, open_msgcat);
 	if (result != ISC_R_SUCCESS) {
 		/*
-		 * Normally we'd use RUNTIME_CHECK() or FATAL_ERROR(), but
+		 * Normally we'd use RUNTIME_CHECK() or BIND_FATAL_ERROR(), but
 		 * we can't do that here, since they might call us!
 		 * (Note that the catalog might be open anyway, so we might
 		 * as well try to  provide an internationalized message.)

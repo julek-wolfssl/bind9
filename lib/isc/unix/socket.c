@@ -1200,7 +1200,7 @@ select_poke(isc__socketmgr_t *mgr, int fd, int msg) {
 
 	if (cc < 0) {
 		isc__strerror(errno, strbuf, sizeof(strbuf));
-		FATAL_ERROR(__FILE__, __LINE__,
+		BIND_FATAL_ERROR(__FILE__, __LINE__,
 			    isc_msgcat_get(isc_msgcat, ISC_MSGSET_SOCKET,
 					   ISC_MSG_WRITEFAILED,
 					   "write() failed "
@@ -1228,7 +1228,7 @@ select_readmsg(isc__socketmgr_t *mgr, int *fd, int *msg) {
 			return;
 
 		isc__strerror(errno, strbuf, sizeof(strbuf));
-		FATAL_ERROR(__FILE__, __LINE__,
+		BIND_FATAL_ERROR(__FILE__, __LINE__,
 			    isc_msgcat_get(isc_msgcat, ISC_MSGSET_SOCKET,
 					   ISC_MSG_READFAILED,
 					   "read() failed "
@@ -4356,7 +4356,7 @@ watcher(void *uap) {
 
 			if (cc < 0 && !SOFT_ERROR(errno)) {
 				isc__strerror(errno, strbuf, sizeof(strbuf));
-				FATAL_ERROR(__FILE__, __LINE__,
+				BIND_FATAL_ERROR(__FILE__, __LINE__,
 					    "%s %s: %s", fnname,
 					    isc_msgcat_get(isc_msgcat,
 							   ISC_MSGSET_GENERAL,
